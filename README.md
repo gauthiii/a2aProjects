@@ -28,7 +28,7 @@ In this repo:
 
 | Project Title | The Chain | Run Commands (overview) |
 | --- | --- | --- |
-| Travel Planner × Weather Stylist (A2A + MCP Demo) | talk_to_agent.py → Travel Planner Agent (A2A, port 8081) → Weather Stylist Agent (A2A, port 8080) → Weather MCP Server (MCP over stdio) → OpenWeather API → back up the chain with an LLM-generated travel + outfit recommendation | 1. Start Weather Stylist Agent: `uv run uvicorn weather_stylist_agent:app --port 8080`  2. Start Travel Planner Agent: `uv run uvicorn travel_planner_agent:app --port 8081`  3. Call the chain: `uv run talk_to_agent.py` |
+| Travel Planner × Weather Stylist (A2A + MCP Demo) | talk_to_agent.py → Travel Planner Agent (A2A, port 8081) → Weather Stylist Agent (A2A, port 8080) → Weather MCP Server (MCP over stdio) → OpenWeather API → back up the chain with an LLM-generated travel + outfit recommendation | 1. Start Weather Stylist Agent: <br> `uv run uvicorn weather_stylist_agent:app --port 8080` <br> 2. Start Travel Planner Agent:<br> `uv run uvicorn travel_planner_agent:app --port 8081` <br> 3. Call the chain:<br> `uv run talk_to_agent.py` |
 
 
 ## How to run this project
@@ -36,11 +36,9 @@ In this repo:
 ### 1. Clone the repo
 
 ```bash
-git clone <your-repo-url>.git
-cd <your-repo-folder>
+git clone https://github.com/gauthiii/a2aProjects
+cd a2aProjects
 ```
-
-(Replace <your-repo-url> and <your-repo-folder> with your actual repo details.)
 
 
 ### 2. Create a .env file
