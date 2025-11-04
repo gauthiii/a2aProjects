@@ -11,17 +11,11 @@ MCP (Model Context Protocol) and A2A solve different layers of the stack:
 
 - MCP is about tools  
   It exposes functions/APIs like get_weather(city) or search_docs(query).  
-  Typical shape: Agent → MCP server (tools).  
-  Think: “LLM or agent calling a toolbox.”
+  Agent → MCP server (tools).  
 
 - A2A is about agents  
   It lets full agents (with their own tools, memory, logic) talk to each other.  
-  Typical shape: Agent A ↔ Agent B (conversation/requests).  
-  Think: “Specialist agents collaborating.”
-
-In this repo:
-- A2A connects: Travel Planner Agent ↔ Weather Stylist Agent.
-- MCP connects: Weather Stylist Agent → Weather MCP Server → OpenWeather API.
+  Agent A ↔ Agent B (conversation/requests).  
 
 
 ## Projects
