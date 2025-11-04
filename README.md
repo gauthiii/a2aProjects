@@ -28,7 +28,7 @@ In this repo:
 
 | Project Title | The Chain | Run Commands (overview) |
 | --- | --- | --- |
-| Travel Planner × Weather Stylist (A2A + MCP Demo) | talk_to_agent.py → Travel Planner Agent (A2A, port 8081) → Weather Stylist Agent (A2A, port 8080) → Weather MCP Server (MCP over stdio) → OpenWeather API → back up the chain with an LLM-generated travel + outfit recommendation | 1. Start Weather Stylist Agent: <br> `uv run uvicorn weather_stylist_agent:app --port 8080` <br> 2. Start Travel Planner Agent:<br> `uv run uvicorn travel_planner_agent:app --port 8081` <br> 3. Call the chain:<br> `uv run talk_to_agent.py` |
+| Travel Planner × Weather Stylist <br> (A2A + MCP Demo) | talk_to_agent.py → Travel Planner Agent <br> (A2A, port 8081) → Weather Stylist Agent <br> (A2A, port 8080) → Weather MCP Server <br> (MCP over stdio) → OpenWeather API → LLM → outfit recommendation | 1. Start Weather Stylist Agent: <br> `uv run uvicorn weather_stylist_agent:app --port 8080` <br> 2. Start Travel Planner Agent:<br> `uv run uvicorn travel_planner_agent:app --port 8081` <br> 3. Call the chain:<br> `uv run talk_to_agent.py` |
 
 
 ## How to run this project
