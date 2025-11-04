@@ -1,6 +1,6 @@
 # A2A Projects – Overview
 
-## What is A2A?
+### What is A2A?
 
 A2A (Agent-to-Agent protocol) is a standard way for agents to talk to each other over HTTP using a shared message format (JSON-RPC + structured messages).
 
