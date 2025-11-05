@@ -22,9 +22,11 @@ MCP (Model Context Protocol) and A2A solve different layers of the stack:
 
 <span style="font-size: 12px;">
 
-| Project Title | The Chain and Run Commands|
+| Project Title | The Chain and Run Commands |
 | ----- | ------- |
 | Travel Planner × Weather Stylist <br> (A2A + MCP Demo) | A2A connects: Travel Planner Agent ↔ Weather Stylist Agent. <br> MCP connects: Weather Stylist Agent → Weather MCP Server → OpenWeather API. <br><br> 1. Start Weather Stylist Agent: <br> `uv run uvicorn weather_stylist_agent:app --port 8080` <br> 2. Start Travel Planner Agent:<br> `uv run uvicorn travel_planner_agent:app --port 8081` <br> 3. Call the chain:<br> `uv run talk_to_agent.py` |
+| Currency & Stocks Pair <br> (A2A + MCP Demo) | A2A connects: Forex Analyst Agent ↔ Market Analyst Agent. <br> MCP connects: <br> • Forex Analyst Agent → Currency MCP Server → Exchange Rate API <br> • Market Analyst Agent → Stock MCP Server → Yahoo Finance API. <br><br> 1. Start Currency MCP Server: <br> `uv run python currency_mcp_server.py` <br> 2. Start Stock MCP Server: <br> `uv run python stock_data_server.py` <br> 3. Start Forex Analyst (A2A) Agent: <br> `uv run python forex_server.py --port 10001` <br> 4. Start Market Analyst (A2A) Agent: <br> `uv run python stock_server.py --port 10002` <br> 5. Run the orchestrator to connect both: <br> `uv run python orchestrator_google_in_eur.py` |
+
 
 </span>
 

@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+      "gmail": {
+      "command": "python",
+      "args": ["currency_mcp_server.py"],
+      "transport": "stdio"
+    }
+    }
+  }
