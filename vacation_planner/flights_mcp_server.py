@@ -15,16 +15,16 @@ mcp=FastMCP("Flights Server")
 
 
 @mcp.tool()
-def search_flights(querystring: str) -> str:
+def flight_search(querystring: dict = {}) -> str:
     """
     Uses Google FLights API to search for flights based on the given parameters.
-    The query string must look like this:
+    The query string dict must look like this:
     {"departure_id":"LAX","arrival_id":"JFK","outbound_date":"2025-12-24","return_date":"2026-01-09","travel_class":"ECONOMY","adults":"1","show_hidden":"1","currency":"USD","language_code":"en-US","country_code":"US","search_type":"best"}
     Return the search results in JSON format that is converted into a string.
     """
     # url = "https://google-flights2.p.rapidapi.com/api/v1/searchFlights"
 
-    # querystring = {"departure_id":"LAX","arrival_id":"JFK","outbound_date":"2025-12-24","return_date":"2026-01-09","travel_class":"ECONOMY","adults":"1","show_hidden":"1","currency":"USD","language_code":"en-US","country_code":"US","search_type":"best"}
+    # # querystring = {"departure_id":"LAX","arrival_id":"JFK","outbound_date":"2025-12-24","return_date":"2026-01-09","travel_class":"ECONOMY","adults":"1","show_hidden":"1","currency":"USD","language_code":"en-US","country_code":"US","search_type":"best"}
 
     # headers = {
     #     "x-rapidapi-key": RAPID_GOOGLE_FLIGHTS_API,
@@ -35,7 +35,7 @@ def search_flights(querystring: str) -> str:
 
     # return json.dumps(response.json())
 
-    return "Your flight ticket is 100 USD"
+    return "Your flight ticket is $100"
 
 
 

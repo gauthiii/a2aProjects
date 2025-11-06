@@ -25,6 +25,8 @@ load_dotenv()
 from a2a.client import A2ACardResolver, A2AClient
 from a2a.types import MessageSendParams, SendMessageRequest
 
+import agents.routing, agents.flight_llm
+
 BASE_URL = "http://localhost:8090"
 
 
@@ -50,6 +52,84 @@ class FlightAgent:
         return self._tools
 
     async def invoke(self, user_input: str) -> str:
+
+
+
+        async with httpx.AsyncClient(timeout=120.0) as httpx_client:
+            
+            # 1) Discover agent card from /.well-known/agent-card.json
+            resolver = A2ACardResolver(
+                httpx_client=httpx_client,
+                base_url=BASE_URL,
+            )
+            agent_card = await resolver.get_agent_card()
+
+            airBnbResponse="Airbnb agent wasn't required for this use case. Ignore the Airbnb suggestions."
+
+            if agent_card:
+
+
+                print("Agents Available:")
+
+                skills_mapping = {
+                            "flightAgent": external_skill.model_dump(),
+                            "airbnbAgent": [s.model_dump() for s in agent_card.skills],
+                        }
+                
+                print(skills_mapping)
+
+                skills_mapping_str = json.dumps(skills_mapping, indent=2)
+
+                agent_decision = await agents.routing.routing(skills_mapping_str, user_input)
+                agent_decision = json.loads(agent_decision)
+
+                print("\nRouting decision:", agent_decision)
+
+                
+
+                if agent_decision.get("airbnbAgent")==True:
+
+                    print("\n******************")
+
+                    print("Orchestrator: Hey I know a friend who can help you with this:")
+
+                    print(agent_card.name)
+
+                    print("******************\n")
+
+                    # If only airbnb agent, then transfer the prompt here
+                    airbnbPrompt = user_input
+
+                    # If both agents, split the prompts
+                    if agent_decision.get("flightAgent")==True:
+                        airbnbPrompt = agent_decision.get("airBnbPrompt")
+                        user_input = agent_decision.get("flightPrompt")
+
+
+
+                    # Create an A2A client for that airbnb agent
+                    client = A2AClient(httpx_client=httpx_client, agent_card=agent_card)
+
+
+                    send_message_payload: dict[str, Any] = {
+                        "message": {
+                            "role": "user",
+                            "parts": [
+                                {"kind": "text", "text": airbnbPrompt},
+                            ],
+                            "messageId": uuid4().hex,
+                        }
+                    }
+
+                    request = SendMessageRequest(
+                        id=str(uuid4()),
+                        params=MessageSendParams(**send_message_payload),
+                    )
+
+                    
+                    airBnbResponse = await client.send_message(request)
+
+
         tools = await self._ensure_tools()
 
         if tools:
@@ -60,84 +140,10 @@ class FlightAgent:
             tool_mapping = tool_def_maker.build_tool_mapping(tools,tool_def)
 
 
-        search_res = await tools[0].ainvoke({"querystring": user_input})
+        flightResponse = "Flight agent wasn't required for this use case. Ignore the Flight suggestions."
+        flightResponse = await agents.flight_llm.flight_search_openai(user_input,tool_mapping,tool_def)
 
-
-        async with httpx.AsyncClient(timeout=60.0) as httpx_client:
-            # 1) Discover agent card from /.well-known/agent-card.json
-            resolver = A2ACardResolver(
-                httpx_client=httpx_client,
-                base_url=BASE_URL,
-            )
-            agent_card = await resolver.get_agent_card()
-
-            if agent_card:
-                print("\n******************")
-
-                print("Orchestrator: Hey I know a friend who can help you with this:")
-
-                print(agent_card.name)
-
-                print("******************\n")
-
-
-            # 2) Create an A2A client for that agent
-            client = A2AClient(httpx_client=httpx_client, agent_card=agent_card)
-
-            # 3) Build the user message (A2A message structure)
-            full_message = f"Find me places to stay in Chennai on January 1st, 2026."
-
-            send_message_payload: dict[str, Any] = {
-                "message": {
-                    "role": "user",
-                    "parts": [
-                        {"kind": "text", "text": full_message},
-                    ],
-                    "messageId": uuid4().hex,
-                }
-            }
-
-            request = SendMessageRequest(
-                id=str(uuid4()),
-                params=MessageSendParams(**send_message_payload),
-            )
-
-            # 4) Call the agent via A2A
-            response = await client.send_message(request)
-
-        prompt = f"""
-
-
-                    User query: {user_input}
-                    
-                    Raw flight search result:
-                    
-                    {search_res}
-
-                    AirBnb suggestions:
-
-                    {response} 
-                    
-                    
-                    Just give this is in a concise manner.
-
-
-                    """
-
-        # Use LLM to summarise the raw search result
-        completion = self._llm_client.chat.completions.create(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": "You are an expert travel assistant."},
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
-        )
-
-        content: Any = completion.choices[0].message.content
-        return content if isinstance(content, str) else str(content)
+        return str(flightResponse)+" "+str(airBnbResponse)
 
 
 class FlightAgentExecutor(AgentExecutor):
@@ -158,9 +164,9 @@ class FlightAgentExecutor(AgentExecutor):
 
 external_skill = AgentSkill(
     id="flight_agent",
-    name="FlightAgent",
+    name="Flight Agent",
     description="Uses the Google Flights MCP to search for flights.",
-    tags=["flight", "search", "mcp"],
+    tags=["flight", "flight prices", "flight search", "trips"],
 )
 
 external_card = AgentCard(

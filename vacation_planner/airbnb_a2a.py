@@ -21,6 +21,8 @@ import aisuite as ai
 
 load_dotenv()
 
+import agents.airbnb_llm
+
 
 def load_mcp_config(config_path: str = "config.json"):
     cfg = json.loads(Path(config_path).read_text())
@@ -30,7 +32,7 @@ def load_mcp_config(config_path: str = "config.json"):
     return servers
 
 
-class ExternalWebAgent:
+class AirBnbAgent:
     def __init__(self) -> None:
         self._mcp_client = MultiServerMCPClient(load_mcp_config("airbnb_config.json"))
         self._llm_client = ai.Client()
@@ -53,42 +55,14 @@ class ExternalWebAgent:
             tool_mapping = tool_def_maker.build_tool_mapping(tools,tool_def)
 
 
-        search_res = await tools[0].ainvoke({"query": user_input})
-
-        prompt = f"""
-
-
-                    User query: {user_input}
-                    
-                    Raw search result:
-                    
-                    {search_res} 
-                    
-                    
-                    Just give the top most result in a concise format
+        airbnbResponse = await agents.airbnb_llm.airbnb_search_openai(user_input,tool_mapping,tool_def)
+        
+        return airbnbResponse
 
 
-                    """
-
-        # Use LLM to summarise the raw search result
-        completion = self._llm_client.chat.completions.create(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": "You are an expert travel assistant."},
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
-        )
-
-        content: Any = completion.choices[0].message.content
-        return content if isinstance(content, str) else str(content)
-
-
-class ExternalWebAgentExecutor(AgentExecutor):
+class AirBnbAgentExecutor(AgentExecutor):
     def __init__(self) -> None:
-        self.agent = ExternalWebAgent()
+        self.agent = AirBnbAgent()
 
     async def execute(
         self,
@@ -103,14 +77,14 @@ class ExternalWebAgentExecutor(AgentExecutor):
         raise Exception("Cancellation not supported")    
 
 external_skill = AgentSkill(
-    id="external_web",
-    name="External Web Agent",
+    id="airbnb_agent",
+    name="AirBnb Agent",
     description="Uses the Airbnb MCP Server and it's search and listing tools to search for hotels, properties, accomodations, and other stays",
-    tags=["web", "search", "mcp"],
+    tags=["stays", "hotels", "reservations", "accomodations", "rooms", "airbnb search",],
 )
 
 external_card = AgentCard(
-    name="External Web Agent",
+    name="AirBnb Agent",
     description="A2A agent backed by multiple external MCP servers.",
     url="http://localhost:8090/",
     version="1.0.0",
@@ -122,7 +96,7 @@ external_card = AgentCard(
 )
 
 request_handler = DefaultRequestHandler(
-    agent_executor=ExternalWebAgentExecutor(),
+    agent_executor=AirBnbAgentExecutor(),
     task_store=InMemoryTaskStore(),
 )
 

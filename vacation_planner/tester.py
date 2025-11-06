@@ -8,6 +8,8 @@ from a2a.types import MessageSendParams, SendMessageRequest
 
 from dotenv import load_dotenv
 
+import agents.a2a_final_response
+
 load_dotenv()
 
 BASE_URL = "http://localhost:8091"
@@ -17,7 +19,7 @@ async def ask_agent(message: str) -> None:
     """
     Send a simple A2A message to the Flight agent and print the response.
     """
-    async with httpx.AsyncClient(timeout=60.0) as httpx_client:
+    async with httpx.AsyncClient(timeout=120.0) as httpx_client:
         # 1) Discover agent card from /.well-known/agent-card.json
         resolver = A2ACardResolver(
             httpx_client=httpx_client,
@@ -61,12 +63,15 @@ async def ask_agent(message: str) -> None:
 
         # 5) Print raw JSON for now
         print("=== Raw A2A response ===")
-        print(response.model_dump(mode="json", exclude_none=True))
+
+        final_response = await agents.a2a_final_response.final_response(message, str(response.model_dump(mode="json", exclude_none=True)))
+
+        print(final_response)
 
 
 async def main() -> None:
     await ask_agent(
-        "Find me flights from New York to Chennai on January 1, 2026",
+        "I need to find some stays in chennai for Jan 1 2026.",
       
     )
 
