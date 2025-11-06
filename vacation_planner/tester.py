@@ -10,12 +10,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = "http://localhost:8081"
+BASE_URL = "http://localhost:8091"
 
 
-async def ask_agent(message: str, city: str) -> None:
+async def ask_agent(message: str) -> None:
     """
-    Send a simple A2A message to the Weather Stylist agent and print the response.
+    Send a simple A2A message to the Flight agent and print the response.
     """
     async with httpx.AsyncClient(timeout=60.0) as httpx_client:
         # 1) Discover agent card from /.well-known/agent-card.json
@@ -39,7 +39,7 @@ async def ask_agent(message: str, city: str) -> None:
         client = A2AClient(httpx_client=httpx_client, agent_card=agent_card)
 
         # 3) Build the user message (A2A message structure)
-        full_message = f"{message} (city: {city})"
+        full_message = f"{message}"
 
         send_message_payload: dict[str, Any] = {
             "message": {
@@ -66,8 +66,8 @@ async def ask_agent(message: str, city: str) -> None:
 
 async def main() -> None:
     await ask_agent(
-        "I'm visiting Chennai tomorrow evening; do I need an umbrella and what should I wear?",
-        city="Chennai",
+        "Find me flights from New York to Chennai on January 1, 2026",
+      
     )
 
 

@@ -66,6 +66,16 @@ class TravelPlannerAgent:
             )
             agent_card = await resolver.get_agent_card()
 
+            if agent_card:
+                print("\n******************")
+
+                print("Travel Planner: Hey I know an agent who can help you with this:")
+
+                print(agent_card.name)
+
+                print("******************\n")
+
+
             # 2) Create an A2A client (yes, A2AClient is deprecated, but fine for now)
             client = A2AClient(httpx_client=httpx_client, agent_card=agent_card)
 

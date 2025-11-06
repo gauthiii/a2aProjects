@@ -77,8 +77,8 @@ class WeatherStylistAgent:
                     await session.initialize()
 
                     # Optional: sanity-check tools
-                    # tools_response = await session.list_tools()
-                    # print("MCP tools:", [t.name for t in tools_response.tools])
+                    tools_response = await session.list_tools()
+                    print("MCP tools:", [t.name for t in tools_response.tools])
 
                     result = await session.call_tool(
                         "get_weather", arguments={"city": city}
@@ -118,6 +118,9 @@ class WeatherStylistAgent:
             user_input = "Give a generic outfit recommendation for mild spring weather."
 
         city = self._extract_city(user_input)
+        print("**************************\n")
+        print("Calling MCP weather tool")
+        print("**************************\n")
         weather_data = await self._get_weather_from_mcp(city)
 
         # Build a compact weather summary to give the model
