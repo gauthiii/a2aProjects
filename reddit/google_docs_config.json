@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+                  "googleDocs": {
+                    "command": "python",
+                    "args": ["googleDocs.py"]
+                  }
+      }
+  }

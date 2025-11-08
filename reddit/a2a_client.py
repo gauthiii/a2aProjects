@@ -8,17 +8,24 @@ from a2a.types import MessageSendParams, SendMessageRequest
 
 from dotenv import load_dotenv
 
-# import agents.a2a_final_response
+
+
+import agents.initialPlanner, agents.clientResponse
 
 load_dotenv()
 
-BASE_URL = "http://localhost:8130"
+BASE_URL = "http://localhost:8131"
 
 
 async def ask_agent(message: str) -> None:
     """
     Send a simple A2A message to the Flight agent and print the response.
     """
+
+    strategy = await agents.initialPlanner.inital_planner_ollama(message)
+
+    print(strategy)
+    
     async with httpx.AsyncClient(timeout=120.0) as httpx_client:
         # 1) Discover agent card from /.well-known/agent-card.json
         resolver = A2ACardResolver(
@@ -35,6 +42,8 @@ async def ask_agent(message: str) -> None:
             print(agent_card.name)
 
             print("******************\n")
+
+        
 
 
         # 2) Create an A2A client for that agent
@@ -64,16 +73,16 @@ async def ask_agent(message: str) -> None:
         # 5) Print raw JSON for now
         print("=== Raw A2A response ===")
 
-        # final_response = await agents.a2a_final_response.final_response(message, str(response.model_dump(mode="json", exclude_none=True)))
+        final_response = await agents.clientResponse.client_response_ollama(str(response.model_dump(mode="json", exclude_none=True)))
 
-        # print(final_response)
+        print(final_response)
 
-        print(response.model_dump(mode="json", exclude_none=True))
+        # print(response.model_dump(mode="json", exclude_none=True))
 
 
 async def main() -> None:
     await ask_agent(
-        "Find me the latest reddit posts on Agentic AI.",
+        "Write me a content of how AI chips and processor chips are made and store it do the docs",
       
     )
 
