@@ -7,6 +7,9 @@ requires-python = ">=3.13"
 dependencies = [
     "a2a-sdk[http-server]>=0.3.10",
     "aisuite[anthropic]>=0.1.6",
+    "google-api-python-client>=2.187.0",
+    "google-auth-httplib2>=0.2.1",
+    "google-auth-oauthlib>=1.2.3",
     "httpx>=0.28.1",
     "langchain-mcp-adapters>=0.1.12",
     "mcp-use>=1.4.0",
