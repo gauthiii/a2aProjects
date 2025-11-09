@@ -15,6 +15,8 @@ async def inital_planner_ollama(user_input: str, model: str = "ollama:gemma3:lat
         Use the LLM to plan how to:
         - execute the user's request
         """
+        print("Initiated planning...")
+
         prompt = f"""
 
                 This is what the user wants to do: {user_input}
@@ -50,6 +52,8 @@ async def inital_planner_ollama(user_input: str, model: str = "ollama:gemma3:lat
                 {"role": "user", "content": prompt},
             ],
         )
+
+        print("Planner ollama has responded...")
 
         content = completion.choices[0].message.content
 

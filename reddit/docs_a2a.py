@@ -21,7 +21,10 @@ import aisuite as ai
 
 load_dotenv()
 
-import agents.googleDocs_llm
+import agents.workflow, agents.clientResponse
+
+from a2a.client import A2ACardResolver, A2AClient
+from a2a.types import MessageSendParams, SendMessageRequest
 
 
 
@@ -46,7 +49,7 @@ class GoogleDocsAgent:
             self._tools = await self._mcp_client.get_tools()
         return self._tools
 
-    async def invoke(self, user_input: str) -> str:
+    async def invoke(self, user_input: str, function, agent: str) -> str:
         tools = await self._ensure_tools()
 
         if tools:
@@ -56,10 +59,60 @@ class GoogleDocsAgent:
             tool_def = [tool_def_maker.lc_tool_to_openai_def(t) for t in tools]
             tool_mapping = tool_def_maker.build_tool_mapping(tools,tool_def)
 
-
-        googleDocsResponse = await agents.googleDocs_llm.googleDocs_openAI(user_input,tool_mapping,tool_def)
         
-        return googleDocsResponse
+        if agent == "googleDocs":
+            response = await function(user_input,tool_mapping,tool_def)
+
+        else:
+            async with httpx.AsyncClient(timeout=120.0) as httpx_client:
+                # 1) Discover agent card from /.well-known/agent-card.json
+                resolver = A2ACardResolver(
+                    httpx_client=httpx_client,
+                    base_url="http://localhost:8130/",
+                )
+                agent_card = await resolver.get_agent_card()
+
+                if agent_card:
+                    print("\n******************")
+
+                    print("Orchestrator: Hey I know a friend who can help you with this:")
+
+                    print(agent_card.name)
+
+                    print("******************\n")
+
+                
+
+
+                # 2) Create an A2A client for that agent
+                client = A2AClient(httpx_client=httpx_client, agent_card=agent_card)
+
+                # 3) Build the user message (A2A message structure)
+                full_message = f"{user_input}"
+
+                send_message_payload: dict[str, Any] = {
+                    "message": {
+                        "role": "user",
+                        "parts": [
+                            {"kind": "text", "text": full_message},
+                        ],
+                        "messageId": uuid4().hex,
+                    }
+                }
+
+                request = SendMessageRequest(
+                    id=str(uuid4()),
+                    params=MessageSendParams(**send_message_payload),
+                )
+
+                # 4) Call the agent via A2A
+                result = await client.send_message(request)
+
+                response = await agents.clientResponse.client_response_ollama(str(result.model_dump(mode="json", exclude_none=True)))
+
+
+        
+        return response
 
 
 class GoogleDocsAgentExecutor(AgentExecutor):
@@ -72,7 +125,8 @@ class GoogleDocsAgentExecutor(AgentExecutor):
         event_queue: EventQueue,
     ) -> None:
         user_input: str = context.get_user_input()  # type: ignore[assignment]
-        result = await self.agent.invoke(user_input)
+        # result = await self.agent.invoke(user_input)
+        result = await agents.workflow.workflow(user_input, self.agent)
         await event_queue.enqueue_event(new_agent_text_message(result))
 
     async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:

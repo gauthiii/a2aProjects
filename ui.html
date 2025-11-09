@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>A2A × MCP – Reddit × Google Docs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-3xl mx-auto p-6">
+      <div class="bg-slate-800 rounded-2xl shadow-lg p-6 space-y-6">
+        <!-- Header -->
+        <header class="space-y-1">
+          <h1 class="text-2xl font-bold tracking-tight">
+            Reddit × Google Docs – A2A Demo
+          </h1>
+          <p class="text-sm text-slate-300">
+            Ask a question. The system will research Reddit, write to Google Docs, and return a summary.
+          </p>
+        </header>
+
+        <!-- Input area -->
+        <form id="ask-form" class="space-y-4">
+          <label class="block text-sm font-medium text-slate-200">
+            Your prompt
+          </label>
+          <textarea
+            id="message"
+            rows="4"
+            class="w-full rounded-xl bg-slate-900 border border-slate-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="e.g. Write me a content about Marvel's latest upcoming movies and their updates."
+          ></textarea>
+
+          <button
+            type="submit"
+            id="submit-btn"
+            class="inline-flex items-center rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <span id="btn-text">Ask Agent</span>
+            <svg
+              id="spinner"
+              class="hidden ml-2 h-4 w-4 animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Output area -->
+        <section class="space-y-2">
+          <h2 class="text-sm font-semibold text-slate-200">Response</h2>
+          <div
+            id="response-box"
+            class="min-h-[120px] rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm overflow-y-auto whitespace-pre-wrap"
+          >
+            <span class="text-slate-500 text-xs"
+              >Your answer will appear here…</span
+            >
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("ask-form");
+      const messageEl = document.getElementById("message");
+      const responseBox = document.getElementById("response-box");
+      const submitBtn = document.getElementById("submit-btn");
+      const spinner = document.getElementById("spinner");
+      const btnText = document.getElementById("btn-text");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const message = messageEl.value.trim();
+        if (!message) return;
+
+        submitBtn.disabled = true;
+        spinner.classList.remove("hidden");
+        btnText.textContent = "Thinking...";
+        responseBox.textContent = "Calling agents and MCP servers…";
+
+        try {
+          const res = await fetch("http://localhost:8000/ask", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message }),
+          });
+
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || "Request failed");
+          }
+
+          const data = await res.json();
+          responseBox.textContent = data.answer || "(No answer returned)";
+        } catch (err) {
+          console.error(err);
+          responseBox.textContent =
+            "Error: " + (err?.message || "Something went wrong");
+        } finally {
+          submitBtn.disabled = false;
+          spinner.classList.add("hidden");
+          btnText.textContent = "Ask Agent";
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -17,6 +17,10 @@ async def reddit_search_openai(user_input: str,tool_mapping: dict = {}, tool_def
                 You need to help the user with his search on reddit.
                 Use tools if required.
 
+                Make sure it's relevant to the user's query and 
+                you are free to search through any subreddit 
+                but it is your task to decide the subreddits based on the request.
+
                 Make sure you give only atmost 5 findings.
                 And give your findings in a concise way.
 

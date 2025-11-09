@@ -82,7 +82,7 @@ async def ask_agent(message: str) -> None:
 
 async def main() -> None:
     await ask_agent(
-        "Write me a content of how AI chips and processor chips are made and store it do the docs",
+        "Write me a content about Marvel's latest upcoming movies and their updates.",
       
     )
 
